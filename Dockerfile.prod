@@ -1,0 +1,34 @@
+# Multi-stage build for production-ready deployment
+# Build Stage
+FROM node:16-alpine AS builder
+
+# Install git
+RUN apk add --no-cache git
+
+# Set working directory
+WORKDIR /app
+
+# Set GitHub repository URL (replace with your actual repository URL)
+ARG GITHUB_REPO_URL=https://github.com/yourusername/Fleet-Pulse-Web.git
+ARG BRANCH=main
+
+# Clone the repository
+RUN git clone --branch ${BRANCH} ${GITHUB_REPO_URL} .
+
+# Install dependencies
+RUN npm install
+
+# Build the application
+RUN npm run build
+
+# Production Stage
+FROM nginx:alpine
+
+# Copy built files from builder stage
+COPY --from=builder /app/build /usr/share/nginx/html
+
+# Expose port 80
+EXPOSE 80
+
+# Start nginx
+CMD ["nginx", "-g", "daemon off;"]
