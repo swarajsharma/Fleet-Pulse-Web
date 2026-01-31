@@ -17,23 +17,32 @@ const News = (props)=>{
 
     const updateNews = async ()=> {
         props.setProgress(10);
-        const url = `https://newsapi.org/v2/top-headlines?country=${props.country}&category=${props.category}&apiKey=${props.apiKey}&page=${page}&pageSize=${props.pageSize}`; 
-        console.log(url);
+        // const url = `https://newsapi.org/v2/top-headlines?country=${props.country}&category=${props.category}&apiKey=${props.apiKey}&page=${page}&pageSize=${props.pageSize}`; 
+        // console.log(url);
+        const url  = `${process.env.PUBLIC_URL}/sampleOutput.json`;
         setLoading(true)
-        let data = await fetch(url, {
-            mode: 'cors',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            referrerPolicy: 'strict-origin-when-cross-origin'
-        });
-        props.setProgress(30);
-        let parsedData = await data.json()
-        props.setProgress(70);
-        setArticles(parsedData.articles)
-        setTotalResults(parsedData.totalResults)
-        setLoading(false)
-        props.setProgress(100);
+        try {
+            let data = await fetch(url, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            });
+            props.setProgress(30);
+            if (!data.ok) {
+                throw new Error(`HTTP error! status: ${data.status}`);
+            }
+            let parsedData = await data.json()
+            props.setProgress(70);
+            setArticles(parsedData.articles)
+            setTotalResults(parsedData.totalResults)
+            setLoading(false)
+            props.setProgress(100);
+        } catch (error) {
+            console.error('Error fetching news:', error);
+            setLoading(false);
+            props.setProgress(100);
+        }
     }
 
     useEffect(() => {
@@ -44,19 +53,26 @@ const News = (props)=>{
 
 
     const fetchMoreData = async () => {   
-        const url = `https://newsapi.org/v2/top-headlines?country=${props.country}&category=${props.category}&apiKey=${props.apiKey}&page=${page+1}&pageSize=${props.pageSize}`;
+        // const url = `https://newsapi.org/v2/top-headlines?country=${props.country}&category=${props.category}&apiKey=${props.apiKey}&page=${page+1}&pageSize=${props.pageSize}`;
+        const url  = `${process.env.PUBLIC_URL}/sampleOutput.json`;
         setPage(page+1) 
-        let data = await fetch(url, {
-            mode: 'cors',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            referrerPolicy: 'strict-origin-when-cross-origin'
-        });
-        let parsedData = await data.json()
-        setArticles(articles.concat(parsedData.articles))
-        setTotalResults(parsedData.totalResults)
-      };
+        try {
+            let data = await fetch(url, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            });
+            if (!data.ok) {
+                throw new Error(`HTTP error! status: ${data.status}`);
+            }
+            let parsedData = await data.json()
+            setArticles(articles.concat(parsedData.articles))
+            setTotalResults(parsedData.totalResults)
+        } catch (error) {
+            console.error('Error fetching more news:', error);
+        }
+    };
  
         return (
             <>
