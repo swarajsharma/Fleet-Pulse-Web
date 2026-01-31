@@ -24,7 +24,8 @@ const News = (props)=>{
             mode: 'cors',
             headers: {
                 'Content-Type': 'application/json',
-            }
+            },
+            referrerPolicy: 'strict-origin-when-cross-origin'
         });
         props.setProgress(30);
         let parsedData = await data.json()
@@ -49,7 +50,8 @@ const News = (props)=>{
             mode: 'cors',
             headers: {
                 'Content-Type': 'application/json',
-            }
+            },
+            referrerPolicy: 'strict-origin-when-cross-origin'
         });
         let parsedData = await data.json()
         setArticles(articles.concat(parsedData.articles))
