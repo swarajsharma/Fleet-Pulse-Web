@@ -8,8 +8,8 @@ describe('App Component', () => {
 
   test('renders NavBar component', () => {
     render(<App />);
-    const navbarElement = screen.getByText(/Fleet-Pulse-Web/i);
-    expect(navbarElement).toBeInTheDocument();
+    const navbarElements = screen.getAllByText(/Fleet-Pulse-Web/i);
+    expect(navbarElements.length).toBeGreaterThan(0);
   });
 
   test('renders navigation links', () => {

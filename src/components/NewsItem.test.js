@@ -54,7 +54,7 @@ describe('NewsItem Component', () => {
 
   test('displays formatted date', () => {
     render(<NewsItem {...mockProps} />);
-    const dateText = screen.getByText(/on/i);
+    const dateText = screen.getByText(/Sat, 31 Jan 2026/i);
     expect(dateText).toBeInTheDocument();
   });
 
