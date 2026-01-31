@@ -18,6 +18,9 @@ RUN git clone --branch ${BRANCH} ${GITHUB_REPO_URL} .
 # Install dependencies
 RUN npm install
 
+# Run unit tests
+RUN npm test -- --coverage --watchAll=false --passWithNoTests
+
 # Build the application
 RUN npm run build
 

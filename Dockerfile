@@ -17,6 +17,9 @@ RUN git clone --branch ${BRANCH} ${GITHUB_REPO_URL} .
 # Install dependencies
 RUN npm install
 
+# Run unit tests
+RUN npm test -- --coverage --watchAll=false --passWithNoTests
+
 # Expose port 3000 (default React development server port)
 EXPOSE 80
 
