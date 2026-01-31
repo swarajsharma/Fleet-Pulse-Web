@@ -1,0 +1,87 @@
+pipeline {
+    agent any
+    
+    environment {
+        DOCKER_IMAGE = 'fleet-pulse-web'
+        DOCKER_TAG = "${env.BUILD_NUMBER}"
+        GITHUB_REPO = 'https://github.com/swarajsharma/Fleet-Pulse-Web.git'
+        GITHUB_BRANCH = 'main'
+    }
+    
+    stages {
+        stage('Build & Test') {
+            steps {
+                echo 'Building Docker image with tests...'
+                script {
+                    // Build Docker image (includes running tests)
+                    sh """
+                        docker build \
+                        --build-arg GITHUB_REPO_URL=${GITHUB_REPO} \
+                        --build-arg BRANCH=${GITHUB_BRANCH} \
+                        -t ${DOCKER_IMAGE}:${DOCKER_TAG} \
+                        -f Dockerfile .
+                    """
+                }
+            }
+            post {
+                failure {
+                    echo 'Build or tests failed! Pipeline stopped.'
+                }
+            }
+        }
+        
+        stage('Tag Image') {
+            steps {
+                echo 'Tagging Docker image...'
+                sh "docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:latest"
+            }
+        }
+        
+        stage('Deploy') {
+            steps {
+                echo 'Deploying application...'
+                sh '''
+                    # Stop and remove existing container
+                    docker stop fleet-pulse-app || true
+                    docker rm fleet-pulse-app || true
+                    
+                    # Run new container
+                    docker run -d \
+                    --name fleet-pulse-app \
+                    --restart unless-stopped \
+                    -p 80:80 \
+                    ${DOCKER_IMAGE}:${DOCKER_TAG}
+                    
+                    # Verify container is running
+                    docker ps | grep fleet-pulse-app
+                '''
+            }
+        }
+        
+        stage('Health Check') {
+            steps {
+                echo 'Performing health check...'
+                sh '''
+                    sleep 5
+                    curl -f http://localhost:80 || exit 1
+                '''
+            }
+        }
+    }
+    
+    post {
+        success {
+            echo 'Pipeline completed successfully!'
+            echo "Application deployed with image: ${DOCKER_IMAGE}:${DOCKER_TAG}"
+        }
+        failure {
+            echo 'Pipeline failed!'
+            // Rollback to previous version if needed
+            sh 'docker stop fleet-pulse-app || true'
+        }
+        always {
+            echo 'Cleaning up old Docker images...'
+            sh 'docker image prune -f'
+        }
+    }
+}
