@@ -18,7 +18,7 @@ RUN git clone --branch ${BRANCH} ${GITHUB_REPO_URL} .
 RUN npm install
 
 # Expose port 3000 (default React development server port)
-EXPOSE 3000
+EXPOSE 80
 
 # Start the application
 CMD ["npm", "start"]
